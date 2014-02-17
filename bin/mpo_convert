@@ -1,0 +1,30 @@
+#!/usr/bin/env ruby
+# Encoding: utf-8
+# Name: MPO Convert
+# Author: Will Brown
+# Created: 2014-02-17
+# Description:
+#   Utility for converting .mpo 3D image files to other 3D image formats
+require 'pathname'
+require 'optparse'
+$LOAD_PATH << Pathname.new(__FILE__).realpath.parent.parent + 'lib'
+require 'mpo_tools'
+
+source, destination, format, scale = nil, nil, :stereo, 1
+OptionParser.new do |opts|
+  opts.banner = 'Usage: mpo_convert -s pics/sample.mpo -d converted/ -a -c 0.5'
+  opts.on('-s', '--source PATH', 'location of disk of the .mpo file') {|s| source = s }
+  opts.on('-d', '--destination PATH', 'output location of the new file')  {|d| destination = d }
+  opts.on('-c', '--scale SCALE', 'The size of the outputted image')  {|c| scale = c.to_f }
+  opts.on('-t', '--stereo', 'Output as stereo (default)') { format = :stereo }
+  opts.on('-x', '--cross-eyed', 'Output as cross-eyed') { format = :cross_eyed }
+  opts.on('-w', '--wiggle', 'Output as wiggle gif') { format = :wiggle }
+  opts.on('-a', '--analglyph', 'Output as analglyph') { format = :analglyph }
+  opts.on('-h', '--help', 'this message') { puts opts; exit 1 }
+end.parse!
+
+begin
+  MpoTools.convert(source, destination, format, scale)
+rescue MpoError => e
+  abort e.message
+end
